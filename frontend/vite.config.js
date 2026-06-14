@@ -23,6 +23,8 @@ export default defineConfig({
   preview: {
     proxy: {
       '/api': {
+        // `backend` is the compose service name; 8080 is its container port and
+        // must match BACKEND_PORT in .env (the port the Go app listens on).
         target: 'http://backend:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),

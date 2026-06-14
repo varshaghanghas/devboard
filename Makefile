@@ -17,7 +17,7 @@ setup:
 	@test -f .env || cp .env.example .env
 	@echo ".env is ready"
 
-up:
+up: setup
 	docker compose up --build
 
 down:

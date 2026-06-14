@@ -53,6 +53,9 @@ docker build -t devboard-frontend ./frontend
 docker build -t devboard-backend ./backend
 ```
 
+The first build downloads base images and compiles the code, so it can take a
+few minutes. Later builds are much faster.
+
 ### Step 3: Run the database
 
 We name it `postgres`. The backend will look for it by that exact name. The
@@ -94,11 +97,15 @@ docker run -d --name frontend --network devboard-net \
 
 ### Step 6: Open it and check
 
-```bash
-open http://localhost:8080            # the app in your browser
+Open **http://localhost:8080** in your browser — you should see the DevBoard
+dashboard with some example tasks. (If the page shows an error for a second on
+first load, the backend is still starting up — just refresh.)
 
-curl http://localhost:8081/health     # backend says OK
-curl "http://localhost:8080/api/tasks?project_id=1"   # app → backend → database
+Then check the wiring from the terminal:
+
+```bash
+curl http://localhost:8081/health                      # backend says OK
+curl "http://localhost:8080/api/tasks?project_id=1"    # app → backend → database
 ```
 
 ### Step 7: Stop and clean up
@@ -123,12 +130,23 @@ exactly the problem Docker Compose solves.
 ## Part 2 — The easy way: Docker Compose
 
 Compose does everything from Part 1 — the network, the names, the order, the
-environment values — from one file (`docker-compose.yml`). One command:
+environment values — from one file (`docker-compose.yml`).
+
+First, create your settings file (one time only). Compose reads it to fill in
+passwords and ports, so the stack won't start without it:
+
+```bash
+cp .env.example .env
+```
+
+Then start everything with one command:
 
 ```bash
 docker compose up --build
-# open http://localhost:8080
 ```
+
+The first build can take a few minutes. When it's done, open
+**http://localhost:8080** in your browser.
 
 Stop it:
 
@@ -158,6 +176,12 @@ make logs      # watch the logs
 make reset     # wipe the database and start fresh
 make smoke     # quick check that everything works
 ```
+
+`make up` creates `.env` for you automatically, so it's the simplest way to start.
+
+> `make` is optional. It's already available on Linux and macOS (on macOS you may
+> need Xcode Command Line Tools: `xcode-select --install`). On Windows, either use
+> WSL or just run the `docker compose` commands from Part 2 directly.
 
 ---
 
