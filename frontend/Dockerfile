@@ -1,9 +1,3 @@
-# Single-stage: build the SPA and serve it with Vite's preview server.
-# Same approach as the master (fundamentals) branch — the only difference on
-# this branch is that the app talks to a real backend. Vite's preview server
-# also proxies /api → backend (see preview.proxy in vite.config.js), so no
-# separate web server (nginx) is needed here.
-
 # Pin a specific Node version (never a floating `latest`).
 FROM node:20-alpine
 

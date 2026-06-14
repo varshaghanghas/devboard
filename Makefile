@@ -1,38 +1,47 @@
-# DevBoard (advanced) — common tasks. Run `make` or `make help` to list them.
-# These wrap the docker compose commands so learners don't have to memorise flags.
+# DevBoard — short commands so you don't have to remember the long ones.
+# Run "make" to see this list.
 
-.DEFAULT_GOAL := help
+help:
+	@echo ""
+	@echo "DevBoard commands:"
+	@echo "  make setup   create your .env file (first time only)"
+	@echo "  make up      build and start everything"
+	@echo "  make down    stop everything"
+	@echo "  make logs    watch the logs"
+	@echo "  make ps      show what is running"
+	@echo "  make reset   wipe the database and start fresh"
+	@echo "  make smoke   quick check that everything works"
+	@echo ""
 
-# Host ports — keep in sync with .env (used by `make smoke`).
-FRONTEND_PORT ?= 8080
-BACKEND_PORT  ?= 8081
+setup:
+	@test -f .env || cp .env.example .env
+	@echo ".env is ready"
 
-.PHONY: help setup up down logs ps reset smoke
-
-help: ## Show this help
-	@grep -hE '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  make %-7s %s\n", $$1, $$2}'
-
-setup: ## Create .env from .env.example if it does not exist yet
-	@if [ ! -f .env ]; then cp .env.example .env && echo "created .env from .env.example"; else echo ".env already exists"; fi
-
-up: setup ## Build and start the whole stack (frontend + backend + postgres)
+up:
 	docker compose up --build
 
-down: ## Stop and remove the containers
+down:
 	docker compose down
 
-logs: ## Tail logs from all services
+logs:
 	docker compose logs -f
 
-ps: ## Show service status
+ps:
 	docker compose ps
 
-reset: ## Wipe the database volume and rebuild (re-runs the init SQL + seed)
+reset:
 	docker compose down -v
 	docker compose up --build
 
-smoke: ## Check the running stack end-to-end (health, SPA, API → DB)
-	@echo "-> backend health";   curl -fsS http://localhost:$(BACKEND_PORT)/health >/dev/null && echo "   OK backend healthy" || { echo "   FAIL backend"; exit 1; }
-	@echo "-> frontend SPA";     curl -fsS http://localhost:$(FRONTEND_PORT)/ | grep -q '<title>' && echo "   OK frontend serving" || { echo "   FAIL frontend"; exit 1; }
-	@echo "-> /api end-to-end";  curl -fsS "http://localhost:$(FRONTEND_PORT)/api/tasks?project_id=1" | grep -q '"tasks"' && echo "   OK api -> backend -> postgres" || { echo "   FAIL api"; exit 1; }
-	@echo "all checks passed -> open http://localhost:$(FRONTEND_PORT)"
+smoke:
+	@echo "backend health:"
+	curl -s http://localhost:8081/health
+	@echo ""
+	@echo "frontend page:"
+	curl -s -o /dev/null -w "  HTTP %{http_code}\n" http://localhost:8080/
+	@echo "tasks from the database:"
+	curl -s "http://localhost:8080/api/tasks?project_id=1"
+	@echo ""
+
+# These are command names, not files — so make always runs them.
+.PHONY: help setup up down logs ps reset smoke
