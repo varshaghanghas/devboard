@@ -30,8 +30,8 @@ jobs:
               working-directory: frontend
 
             - name: Run Tests
-              #run: npm run test
-              run: npm run test -- --config vite.config.js
+              run: npm run test
+              #run: npm run test -- --config vite.config.js
               working-directory: frontend
             
             - name: Docker Setup [Login]
